@@ -1,0 +1,87 @@
+name: Test Suite
+
+on:
+  schedule:
+    # Run every 2 hours
+    - cron: '0 */2 * * *'
+  workflow_dispatch:  # Allow manual triggers
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-all-directories:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      
+      - name: Verify directory structure
+        run: |
+          echo "=== Directory Structure ==="
+          find . -type d -not -path '*/\.*' | sort
+          echo "==========================="
+      
+      - name: Test cosmosSDK module
+        run: |
+          echo "Testing cosmosSDK components..."
+          python -c "from cosmosSDK import Blockchain, Audit, Alerts, Security; print('✓ CosmosSDK imports successful')"
+          python -c "from cosmosSDK import *; print('✓ All modules loaded')"
+      
+      - name: Run unit tests with coverage
+        run: |
+          echo "Running test suite across all directories..."
+          python -m unittest test_kairos.py -v
+      
+      - name: Test Kairos initialization
+        run: |
+          echo "Testing Kairos initialization..."
+          python -c "from kairos import Kairos; k = Kairos(); print('✓ Kairos initialized successfully')"
+      
+      - name: Verify all modules
+        run: |
+          echo "Verifying all Python modules..."
+          python -m py_compile kairos.py
+          python -m py_compile test_kairos.py
+          python -m py_compile demo.py
+          python -m py_compile cosmosSDK/__init__.py
+          python -m py_compile cosmosSDK/blockchain.py
+          python -m py_compile cosmosSDK/audit.py
+          python -m py_compile cosmosSDK/alerts.py
+          python -m py_compile cosmosSDK/security.py
+          echo "✓ All modules compiled successfully"
+      
+      - name: Generate test report
+        if: always()
+        run: |
+          echo "=== Test Report ===" > test-report.txt
+          echo "Timestamp: $(date)" >> test-report.txt
+          echo "Python Version: ${{ matrix.python-version }}" >> test-report.txt
+          echo "Test Status: ${{ job.status }}" >> test-report.txt
+          echo "==================" >> test-report.txt
+          cat test-report.txt
+      
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report-py${{ matrix.python-version }}
+          path: test-report.txt
+          retention-days: 30
