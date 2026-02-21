@@ -2,7 +2,7 @@
 Kairos - Blockchain Audit Bot
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import cosmosSDK
 from cosmosSDK import Blockchain, Audit, Alerts, Security
 
@@ -53,7 +53,7 @@ class Kairos:
                 "type": event_type,
                 "description": description,
                 "details": details,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             self.memory.append(event_entry)
             return True

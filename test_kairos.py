@@ -149,19 +149,23 @@ class TestKairos(unittest.TestCase):
     
     def test_limit_memory(self):
         """Test limiting memory to maximum number of events"""
+        total_events = 15
+        max_events = 10
+        
         # Add 15 events
-        for i in range(15):
+        for i in range(total_events):
             self.kairos.log_event(Security.CriticalError, f"Error {i}", f"Details {i}")
         
-        self.assertEqual(len(self.kairos.memory), 15)
+        self.assertEqual(len(self.kairos.memory), total_events)
         
         # Limit to 10 most recent events
-        self.kairos.limit_memory(10)
-        self.assertEqual(len(self.kairos.memory), 10)
+        self.kairos.limit_memory(max_events)
+        self.assertEqual(len(self.kairos.memory), max_events)
         
-        # Verify we kept the most recent ones (5-14)
-        self.assertEqual(self.kairos.memory[0]["description"], "Error 5")
-        self.assertEqual(self.kairos.memory[-1]["description"], "Error 14")
+        # Verify we kept the most recent ones (discarded first 5, kept 5-14)
+        discarded_count = total_events - max_events
+        self.assertEqual(self.kairos.memory[0]["description"], f"Error {discarded_count}")
+        self.assertEqual(self.kairos.memory[-1]["description"], f"Error {total_events - 1}")
     
     def test_event_has_timestamp(self):
         """Test that logged events include timestamp"""
