@@ -1,6 +1,8 @@
+---
 # Example Bot Workflow for Kairos
-# This workflow demonstrates the type of automated processes that need protection
-# 
+# This workflow demonstrates the type of automated processes
+# that need protection
+#
 # IMPORTANT: This file is protected by CODEOWNERS
 # Changes require approval from @Kushmanmb
 
@@ -11,7 +13,7 @@ on:
     # Run security audit daily at 2 AM UTC
     - cron: '0 2 * * *'
   workflow_dispatch:
-    # Allow manual triggering
+  # Allow manual triggering
   push:
     branches:
       - main
@@ -28,29 +30,31 @@ permissions:
 jobs:
   security-audit:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
       - name: Run Kairos Security Tests
         run: |
           python -m unittest test_kairos.py -v
-      
+
       - name: Run Kairos Bot
         run: |
           python kairos.py
-      
+
       - name: Create security report
         if: always()
         run: |
@@ -62,7 +66,7 @@ jobs:
           echo "- Blockchain monitoring: Active" >> security-report.md
           echo "- Security protocols: Enabled" >> security-report.md
           echo "- Access controls: Verified" >> security-report.md
-      
+
       - name: Upload security report
         if: always()
         uses: actions/upload-artifact@v4
@@ -70,7 +74,7 @@ jobs:
           name: security-report
           path: security-report.md
           retention-days: 30
-      
+
       - name: Comment on latest PR (if any)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
