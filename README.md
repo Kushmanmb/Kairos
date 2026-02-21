@@ -72,6 +72,11 @@ python -m unittest test_kairos.py -v
 ## Architecture
 ```
 Kairos/
+├── .github/
+│   └── workflows/       # Automated workflow configurations
+│       ├── security-audit.yml    # Security audit (runs every 2 hours)
+│       ├── test-suite.yml        # Comprehensive testing (runs every 2 hours)
+│       └── monitoring.yml        # System monitoring (runs every 2 hours)
 ├── cosmosSDK/           # Core SDK framework
 │   ├── __init__.py      # Module initialization
 │   ├── blockchain.py    # Blockchain configurations
@@ -82,6 +87,40 @@ Kairos/
 ├── test_kairos.py       # Test suite
 └── README.md            # This file
 ```
+
+## Automated Workflows
+Kairos includes three automated workflows that run every 2 hours to ensure continuous monitoring and security:
+
+### 1. Security Audit Workflow
+- **Schedule**: Every 2 hours (cron: `0 */2 * * *`)
+- **Purpose**: Performs comprehensive security audits across all directories
+- **Actions**:
+  - Scans all Python modules for security issues
+  - Runs security response demonstrations
+  - Generates audit reports
+  - Tests across multiple Python versions (3.9, 3.10, 3.11)
+
+### 2. Test Suite Workflow
+- **Schedule**: Every 2 hours (cron: `0 */2 * * *`)
+- **Purpose**: Validates code quality and functionality across all directories
+- **Actions**:
+  - Runs complete unit test suite
+  - Verifies all module imports and initialization
+  - Compiles all Python modules
+  - Generates test reports
+  - Tests across multiple Python versions (3.9, 3.10, 3.11)
+
+### 3. System Monitoring Workflow
+- **Schedule**: Every 2 hours (cron: `0 */2 * * *`)
+- **Purpose**: Monitors system health and security features
+- **Actions**:
+  - Checks Kairos system status
+  - Verifies directory health
+  - Tests all security response mechanisms
+  - Monitors threat levels
+  - Generates monitoring reports
+
+All workflows can also be triggered manually via GitHub Actions interface using the `workflow_dispatch` event.
 
 ## License
 Cosmos License - See [LICENSE](LICENSE) file for details
