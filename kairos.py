@@ -50,8 +50,7 @@ class Kairos:
             event_entry = {
                 "type": event_type,
                 "description": description,
-                "details": details,
-                "timestamp": None  # Can be enhanced with datetime if needed
+                "details": details
             }
             self.memory.append(event_entry)
             return True
@@ -65,7 +64,8 @@ class Kairos:
             event_type: Optional filter by event type
         
         Returns:
-            list: Filtered memory events or all events if no filter
+            list: Filtered memory events or all events if no filter.
+                  Returns a copy to prevent external modification of the memory list.
         """
         if event_type is None:
             return self.memory.copy()
