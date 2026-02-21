@@ -1,0 +1,15 @@
+# CODEOWNERS file for Kairos repository
+# This file defines who can approve changes to specific parts of the repository
+
+# Bot workflows and GitHub Actions - Only repository owner can approve changes
+/.github/workflows/ @Kushmanmb
+
+# Branch protection and repository settings
+/.github/settings.yml @Kushmanmb
+/.github/branch-protection.yml @Kushmanmb
+
+# CODEOWNERS file itself - Only repository owner can modify
+/.github/CODEOWNERS @Kushmanmb
+
+# Default owner for all other files (if needed)
+# * @Kushmanmb
