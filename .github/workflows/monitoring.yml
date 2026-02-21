@@ -6,6 +6,9 @@ on:
     - cron: '0 */2 * * *'
   workflow_dispatch:  # Allow manual triggers
 
+permissions:
+  contents: read
+
 jobs:
   monitor-system:
     runs-on: ubuntu-latest
