@@ -68,6 +68,7 @@ for i, event in enumerate(memory, 1):
     print(f"  Type: {event['type']}")
     print(f"  Description: {event['description']}")
     print(f"  Details: {event['details']}")
+    print(f"  Timestamp: {event['timestamp']}")
 
 # Filter by type
 print("\n" + "="*60)

@@ -72,8 +72,8 @@ python -m unittest test_kairos.py -v
 
 ## Memory System
 Kairos includes an intelligent memory system that stores only critical information for future reference:
-- **Critical Errors**: System failures and security breaches
-- **Hacks/Workarounds**: Temporary solutions that need permanent fixes
+- **Critical Errors**: System failures and security breaches (automatically timestamped)
+- **Hacks/Workarounds**: Temporary solutions that need permanent fixes (automatically timestamped)
 
 Regular events are filtered out to maintain focus on what matters most. This creates a valuable knowledge base of what not to do and critical issues to avoid in the future.
 
@@ -81,14 +81,14 @@ Regular events are filtered out to maintain focus on what matters most. This cre
 ```python
 from cosmosSDK import Security
 
-# Log a critical error (will be stored)
+# Log a critical error (will be stored with timestamp)
 kairos.log_event(
     Security.CriticalError,
     "Database connection lost",
     "Connection timeout after 30 seconds"
 )
 
-# Log a hack/workaround (will be stored)
+# Log a hack/workaround (will be stored with timestamp)
 kairos.log_event(
     Security.Hack,
     "Using backup API endpoint",
@@ -110,6 +110,12 @@ critical_errors = kairos.get_memory(Security.CriticalError)
 
 # Retrieve only hacks/workarounds
 hacks = kairos.get_memory(Security.Hack)
+
+# Prevent unbounded memory growth in long-running systems
+kairos.limit_memory(1000)  # Keep only the 1000 most recent events
+
+# Clear all memories (e.g., after archiving externally)
+kairos.clear_memory()
 ```
 
 ## Architecture

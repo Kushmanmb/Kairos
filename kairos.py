@@ -2,6 +2,7 @@
 Kairos - Blockchain Audit Bot
 """
 
+from datetime import datetime
 import cosmosSDK
 from cosmosSDK import Blockchain, Audit, Alerts, Security
 
@@ -39,6 +40,7 @@ class Kairos:
         
         Args:
             event_type: Type of event (Security.CriticalError, Security.Hack, or Security.RegularEvent)
+                       Invalid or unknown event types will be filtered out (not stored).
             description: Brief description of the event
             details: Optional additional details about the event
         
@@ -50,7 +52,8 @@ class Kairos:
             event_entry = {
                 "type": event_type,
                 "description": description,
-                "details": details
+                "details": details,
+                "timestamp": datetime.now().isoformat()
             }
             self.memory.append(event_entry)
             return True
@@ -69,7 +72,26 @@ class Kairos:
         """
         if event_type is None:
             return self.memory.copy()
-        return [event for event in self.memory if event["type"] == event_type]
+        return [event.copy() for event in self.memory if event["type"] == event_type]
+    
+    def clear_memory(self):
+        """
+        Clear all stored memory events.
+        
+        This can be used to prevent unbounded memory growth in long-running systems.
+        Events should be archived externally before clearing if needed for future reference.
+        """
+        self.memory.clear()
+    
+    def limit_memory(self, max_events=1000):
+        """
+        Limit memory to the most recent N events to prevent unbounded growth.
+        
+        Args:
+            max_events: Maximum number of events to keep (default: 1000)
+        """
+        if len(self.memory) > max_events:
+            self.memory = self.memory[-max_events:]
     
     def lockdown(self):
         """Execute lockdown protocol for critical security threats"""

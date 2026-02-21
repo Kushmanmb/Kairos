@@ -58,9 +58,12 @@ class TestKairos(unittest.TestCase):
         )
     
     def test_lockdown_method(self):
-        """Test lockdown method executes successfully"""
+        """Test lockdown method executes successfully and logs to memory"""
         result = self.kairos.lockdown()
         self.assertEqual(result, "lockdown_active")
+        # Verify that lockdown logs a critical error to memory
+        self.assertEqual(len(self.kairos.memory), 1)
+        self.assertEqual(self.kairos.memory[0]["type"], Security.CriticalError)
     
     def test_auto_patch_method(self):
         """Test autoPatch method executes successfully"""
@@ -83,6 +86,7 @@ class TestKairos(unittest.TestCase):
         self.assertEqual(len(self.kairos.memory), 1)
         self.assertEqual(self.kairos.memory[0]["type"], Security.CriticalError)
         self.assertEqual(self.kairos.memory[0]["description"], "Test critical error")
+        self.assertEqual(self.kairos.memory[0]["details"], "Test details")
     
     def test_log_hack(self):
         """Test logging hack/workaround to memory"""
@@ -94,6 +98,7 @@ class TestKairos(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(len(self.kairos.memory), 1)
         self.assertEqual(self.kairos.memory[0]["type"], Security.Hack)
+        self.assertEqual(self.kairos.memory[0]["details"], "Workaround details")
     
     def test_log_regular_event_filtered(self):
         """Test that regular events are not stored in memory"""
@@ -128,9 +133,42 @@ class TestKairos(unittest.TestCase):
     
     def test_lockdown_logs_to_memory(self):
         """Test that lockdown method logs critical error to memory"""
+        initial_length = len(self.kairos.memory)
         self.kairos.lockdown()
+        self.assertEqual(len(self.kairos.memory), initial_length + 1)
+        self.assertEqual(self.kairos.memory[-1]["type"], Security.CriticalError)
+    
+    def test_clear_memory(self):
+        """Test clearing all memory events"""
+        self.kairos.log_event(Security.CriticalError, "Error 1", "Details 1")
+        self.kairos.log_event(Security.Hack, "Hack 1", "Details 2")
+        self.assertEqual(len(self.kairos.memory), 2)
+        
+        self.kairos.clear_memory()
+        self.assertEqual(len(self.kairos.memory), 0)
+    
+    def test_limit_memory(self):
+        """Test limiting memory to maximum number of events"""
+        # Add 15 events
+        for i in range(15):
+            self.kairos.log_event(Security.CriticalError, f"Error {i}", f"Details {i}")
+        
+        self.assertEqual(len(self.kairos.memory), 15)
+        
+        # Limit to 10 most recent events
+        self.kairos.limit_memory(10)
+        self.assertEqual(len(self.kairos.memory), 10)
+        
+        # Verify we kept the most recent ones (5-14)
+        self.assertEqual(self.kairos.memory[0]["description"], "Error 5")
+        self.assertEqual(self.kairos.memory[-1]["description"], "Error 14")
+    
+    def test_event_has_timestamp(self):
+        """Test that logged events include timestamp"""
+        self.kairos.log_event(Security.CriticalError, "Test error", "Details")
         self.assertEqual(len(self.kairos.memory), 1)
-        self.assertEqual(self.kairos.memory[0]["type"], Security.CriticalError)
+        self.assertIn("timestamp", self.kairos.memory[0])
+        self.assertIsNotNone(self.kairos.memory[0]["timestamp"])
 
 
 class TestCosmosSDK(unittest.TestCase):
