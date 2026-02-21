@@ -4,6 +4,9 @@ Blockchain Audit Bot - Advanced Security and Monitoring System
 ## Overview
 Kairos is a comprehensive blockchain security and audit system built with the CosmosSDK framework. It provides automated threat detection, vulnerability patching, and comprehensive monitoring across multiple blockchain platforms.
 
+## Documentation
+- **[Kairos Blockchain Wiki](wiki.html)**: Learn about the project's cosmic vision, destiny, and journey
+
 ## Features
 - **Multi-Blockchain Support**: Monitor all blockchain networks simultaneously
 - **Comprehensive Auditing**: Smart contracts, wallets, exchanges, and transactions
