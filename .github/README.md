@@ -68,7 +68,7 @@ gh api repos/Kushmanmb/Kairos/branches/main/protection \
 
 ### Option 3: GitHub Settings App
 
-Install the [Settings GitHub App](https://github.com/apps/settings) which automatically syncs repository settings from `.github/settings.yml`.
+Install the [Settings GitHub App](https://github.com/apps/settings) which automatically syncs repository settings from a YAML configuration file. Note: The Settings app looks for `.github/settings.yml` by default. You can rename `.github/branch-protection.yml` to `.github/settings.yml` or configure the app to use a different filename.
 
 ## How This Protects Bot Workflows
 
