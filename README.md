@@ -30,7 +30,7 @@ class Kairos:
         self.audit = Audit.SmartContracts, Audit.Wallets, Audit.Exchanges, Audit.Transactions
         self.alerts = Alerts.Yes
         self.permissions = Security.FullAccess
-        self.memory = 512GB
+        self.memory = "512GB"
         self.security = Security.AntiTamper, Security.CopyProtection
         self.accessLevels = {
             1: Security.ReadOnly,

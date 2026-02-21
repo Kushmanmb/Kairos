@@ -33,8 +33,8 @@ class TestKairos(unittest.TestCase):
     
     def test_security_features(self):
         """Test security features are enabled"""
-        expected_security = (Security.AntiTamper, Security.CopyProtection)
-        self.assertEqual(self.kairos.security, expected_security)
+        expected_security_features = (Security.AntiTamper, Security.CopyProtection)
+        self.assertEqual(self.kairos.security, expected_security_features)
     
     def test_access_levels(self):
         """Test access level configuration"""
