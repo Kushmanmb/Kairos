@@ -84,4 +84,4 @@ Kairos/
 ```
 
 ## License
-MIT License
+Cosmos License - See [LICENSE](LICENSE) file for details
