@@ -19,7 +19,7 @@ class TestKairos(unittest.TestCase):
         self.assertEqual(self.kairos.blockchain, Blockchain.All)
         self.assertEqual(self.kairos.alerts, Alerts.Yes)
         self.assertEqual(self.kairos.permissions, Security.FullAccess)
-        self.assertEqual(self.kairos.memory, "512GB")
+        self.assertEqual(self.kairos.memory, [])
     
     def test_audit_configuration(self):
         """Test audit types are properly configured"""
@@ -71,6 +71,66 @@ class TestKairos(unittest.TestCase):
         """Test scheduledPatch method executes successfully"""
         result = self.kairos.scheduledPatch()
         self.assertEqual(result, "patch_scheduled")
+    
+    def test_log_critical_error(self):
+        """Test logging critical error to memory"""
+        result = self.kairos.log_event(
+            Security.CriticalError,
+            "Test critical error",
+            "Test details"
+        )
+        self.assertTrue(result)
+        self.assertEqual(len(self.kairos.memory), 1)
+        self.assertEqual(self.kairos.memory[0]["type"], Security.CriticalError)
+        self.assertEqual(self.kairos.memory[0]["description"], "Test critical error")
+    
+    def test_log_hack(self):
+        """Test logging hack/workaround to memory"""
+        result = self.kairos.log_event(
+            Security.Hack,
+            "Test hack workaround",
+            "Workaround details"
+        )
+        self.assertTrue(result)
+        self.assertEqual(len(self.kairos.memory), 1)
+        self.assertEqual(self.kairos.memory[0]["type"], Security.Hack)
+    
+    def test_log_regular_event_filtered(self):
+        """Test that regular events are not stored in memory"""
+        result = self.kairos.log_event(
+            Security.RegularEvent,
+            "Test regular event",
+            "Should not be stored"
+        )
+        self.assertFalse(result)
+        self.assertEqual(len(self.kairos.memory), 0)
+    
+    def test_get_memory_all(self):
+        """Test retrieving all memory events"""
+        self.kairos.log_event(Security.CriticalError, "Error 1", "Details 1")
+        self.kairos.log_event(Security.Hack, "Hack 1", "Details 2")
+        self.kairos.log_event(Security.RegularEvent, "Event 1", "Should not store")
+        
+        memory = self.kairos.get_memory()
+        self.assertEqual(len(memory), 2)
+    
+    def test_get_memory_filtered(self):
+        """Test retrieving filtered memory events by type"""
+        self.kairos.log_event(Security.CriticalError, "Error 1", "Details 1")
+        self.kairos.log_event(Security.Hack, "Hack 1", "Details 2")
+        self.kairos.log_event(Security.CriticalError, "Error 2", "Details 3")
+        
+        critical_errors = self.kairos.get_memory(Security.CriticalError)
+        self.assertEqual(len(critical_errors), 2)
+        
+        hacks = self.kairos.get_memory(Security.Hack)
+        self.assertEqual(len(hacks), 1)
+    
+    def test_lockdown_logs_to_memory(self):
+        """Test that lockdown method logs critical error to memory"""
+        self.kairos.lockdown()
+        self.assertEqual(len(self.kairos.memory), 1)
+        self.assertEqual(self.kairos.memory[0]["type"], Security.CriticalError)
 
 
 class TestCosmosSDK(unittest.TestCase):
@@ -109,6 +169,12 @@ class TestCosmosSDK(unittest.TestCase):
         self.assertEqual(Security.Critical, "critical")
         self.assertEqual(Security.HighRisk, "high_risk")
         self.assertEqual(Security.MediumRisk, "medium_risk")
+    
+    def test_security_event_types(self):
+        """Test Security event type constants"""
+        self.assertEqual(Security.CriticalError, "critical_error")
+        self.assertEqual(Security.Hack, "hack")
+        self.assertEqual(Security.RegularEvent, "regular_event")
 
 
 if __name__ == "__main__":
