@@ -18,3 +18,8 @@ class Security:
     Critical = "critical"
     HighRisk = "high_risk"
     MediumRisk = "medium_risk"
+    
+    # Event Types for Memory Storage
+    CriticalError = "critical_error"
+    Hack = "hack"
+    RegularEvent = "regular_event"
