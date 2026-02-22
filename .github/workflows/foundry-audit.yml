@@ -45,7 +45,7 @@ jobs:
 
       - name: Update Foundry to latest version
         run: |
-          source $HOME/.bashrc
+          export PATH="$HOME/.foundry/bin:$PATH"
           foundryup
         shell: bash
 
@@ -75,7 +75,7 @@ jobs:
       - name: Run Foundry tests (if contracts exist)
         run: |
           if [ -d "contracts" ] || [ -f "foundry.toml" ]; then
-            forge test -vvv || echo "No Foundry contracts found, skipping tests"
+            forge test -vvv
           else
             echo "No Foundry contracts directory found, skipping Foundry tests"
           fi
