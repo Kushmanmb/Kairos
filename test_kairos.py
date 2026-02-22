@@ -79,6 +79,9 @@ class TestCosmosSDK(unittest.TestCase):
     def test_blockchain_constants(self):
         """Test Blockchain class constants"""
         self.assertEqual(Blockchain.All, "all_blockchains")
+        self.assertEqual(Blockchain.Cosmos, "cosmos")
+        self.assertEqual(Blockchain.Ethereum, "ethereum")
+        self.assertEqual(Blockchain.Foundry, "foundry")
     
     def test_audit_constants(self):
         """Test Audit class constants"""
