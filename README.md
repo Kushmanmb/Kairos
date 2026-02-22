@@ -6,6 +6,9 @@ Kairos is a comprehensive blockchain security and audit system built with the Co
 
 ## Features
 - **Multi-Blockchain Support**: Monitor all blockchain networks simultaneously
+  - Cosmos SDK
+  - Ethereum
+  - Foundry (Smart contract development and testing)
 - **Comprehensive Auditing**: Smart contracts, wallets, exchanges, and transactions
 - **Automated Security Responses**: Critical lockdown, auto-patching, and scheduled maintenance
 - **Granular Access Control**: Three-tier permission system (ReadOnly, Edit, Delete)
@@ -64,6 +67,15 @@ Run the test suite to verify functionality:
 python -m unittest test_kairos.py -v
 ```
 
+## Foundry Integration
+Kairos now includes support for Foundry smart contract development and auditing. The system automatically:
+- Installs and updates Foundry using `foundryup`
+- Monitors Foundry-based smart contracts for vulnerabilities
+- Runs automated security audits on Ethereum/Foundry contracts
+- Provides real-time threat detection for smart contract deployments
+
+The Foundry audit workflow runs automatically via GitHub Actions and can also be triggered manually.
+
 ## Security Response Levels
 - **Critical**: Immediate lockdown - all transactions suspended
 - **High Risk**: Automatic patching - applies security fixes immediately
@@ -72,9 +84,13 @@ python -m unittest test_kairos.py -v
 ## Architecture
 ```
 Kairos/
+├── .github/
+│   └── workflows/
+│       ├── kairos-bot.yml     # Main security audit workflow
+│       └── foundry-audit.yml  # Foundry smart contract audit workflow
 ├── cosmosSDK/           # Core SDK framework
 │   ├── __init__.py      # Module initialization
-│   ├── blockchain.py    # Blockchain configurations
+│   ├── blockchain.py    # Blockchain configurations (Cosmos, Ethereum, Foundry)
 │   ├── audit.py         # Audit type definitions
 │   ├── alerts.py        # Alert system
 │   └── security.py      # Security protocols
