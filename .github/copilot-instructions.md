@@ -74,8 +74,8 @@ Main class that orchestrates the security and audit system with:
 
 ### Threat Response Levels
 - **Critical**: Immediate lockdown - suspend all transactions, restrict access
-- **High Risk**: Automatic patching - apply fixes immediately
-- **Medium Risk**: Scheduled patching - queue for maintenance window
+- **HighRisk**: Automatic patching - apply fixes immediately
+- **MediumRisk**: Scheduled patching - queue for maintenance window
 
 ### Security Features
 - **AntiTamper**: Protection against unauthorized modifications
@@ -148,13 +148,13 @@ def new_response(self):
 class Audit:
     NewAuditType = "new_audit_type"
 
-# In kairos.py
+# In kairos.py __init__ method (during initialization)
 self.audit = (
     Audit.SmartContracts,
     Audit.Wallets,
     Audit.Exchanges,
     Audit.Transactions,
-    Audit.NewAuditType  # Add here
+    Audit.NewAuditType  # Add here during initialization
 )
 ```
 
