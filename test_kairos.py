@@ -3,6 +3,7 @@ Tests for Kairos Blockchain Audit Bot
 """
 
 import unittest
+from unittest.mock import patch, MagicMock
 from kairos import Kairos
 from cosmosSDK import Blockchain, Audit, Alerts, Security
 
@@ -71,6 +72,108 @@ class TestKairos(unittest.TestCase):
         """Test scheduledPatch method executes successfully"""
         result = self.kairos.scheduledPatch()
         self.assertEqual(result, "patch_scheduled")
+    
+    def test_contract_verifier_initialization(self):
+        """Test that contract verifier is initialized"""
+        self.assertIsNotNone(self.kairos.contract_verifier)
+    
+    @patch('contract_verifier.ContractVerifier.fetch_and_verify')
+    def test_audit_smart_contract_success(self, mock_fetch_verify):
+        """Test successful smart contract audit"""
+        mock_fetch_verify.return_value = {
+            'success': True,
+            'verification': {
+                'verified': True,
+                'has_source_code': True,
+                'has_abi': True,
+                'security_issues': [],
+                'warnings': [],
+                'contract_name': 'TestContract',
+                'compiler_version': 'v0.8.0'
+            }
+        }
+        
+        result = self.kairos.audit_smart_contract('0x123456789')
+        
+        self.assertEqual(result['audit_status'], 'complete')
+        self.assertEqual(result['contract_address'], '0x123456789')
+        self.assertIsNone(result['threat_level'])
+    
+    @patch('contract_verifier.ContractVerifier.fetch_and_verify')
+    def test_audit_smart_contract_with_issues(self, mock_fetch_verify):
+        """Test smart contract audit with security issues"""
+        mock_fetch_verify.return_value = {
+            'success': True,
+            'verification': {
+                'verified': False,
+                'has_source_code': True,
+                'has_abi': True,
+                'security_issues': ['Uses tx.origin'],
+                'warnings': [],
+                'contract_name': 'RiskyContract',
+                'compiler_version': 'v0.8.0'
+            }
+        }
+        
+        result = self.kairos.audit_smart_contract('0x123456789')
+        
+        self.assertEqual(result['audit_status'], 'complete')
+        self.assertEqual(result['threat_level'], Security.HighRisk)
+    
+    @patch('contract_verifier.ContractVerifier.fetch_and_verify')
+    def test_audit_smart_contract_unverified(self, mock_fetch_verify):
+        """Test smart contract audit for unverified contract"""
+        mock_fetch_verify.return_value = {
+            'success': True,
+            'verification': {
+                'verified': False,
+                'has_source_code': False,
+                'has_abi': False,
+                'security_issues': ['Contract source code not verified'],
+                'warnings': [],
+                'contract_name': 'Unknown',
+                'compiler_version': 'Unknown'
+            }
+        }
+        
+        result = self.kairos.audit_smart_contract('0x123456789')
+        
+        self.assertEqual(result['audit_status'], 'complete')
+        self.assertEqual(result['threat_level'], Security.HighRisk)
+    
+    @patch('contract_verifier.ContractVerifier.fetch_and_verify')
+    def test_audit_smart_contract_critical_issues(self, mock_fetch_verify):
+        """Test smart contract audit with critical issues"""
+        mock_fetch_verify.return_value = {
+            'success': True,
+            'verification': {
+                'verified': False,
+                'has_source_code': True,
+                'has_abi': True,
+                'security_issues': ['Issue 1', 'Issue 2', 'Issue 3'],
+                'warnings': [],
+                'contract_name': 'DangerousContract',
+                'compiler_version': 'v0.8.0'
+            }
+        }
+        
+        result = self.kairos.audit_smart_contract('0x123456789')
+        
+        self.assertEqual(result['audit_status'], 'complete')
+        self.assertEqual(result['threat_level'], Security.Critical)
+    
+    @patch('contract_verifier.ContractVerifier.fetch_and_verify')
+    def test_audit_smart_contract_failure(self, mock_fetch_verify):
+        """Test smart contract audit failure"""
+        mock_fetch_verify.return_value = {
+            'success': False,
+            'error': 'Connection failed'
+        }
+        
+        result = self.kairos.audit_smart_contract('0x123456789')
+        
+        self.assertEqual(result['audit_status'], 'failed')
+        self.assertIn('error', result)
 
 
 class TestCosmosSDK(unittest.TestCase):
