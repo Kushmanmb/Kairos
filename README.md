@@ -85,3 +85,13 @@ Kairos/
 
 ## License
 Cosmos License - See [LICENSE](LICENSE) file for details
+
+---
+
+<div align="center">
+
+## 💝 Support Development
+
+**Donations:** `kushmanmb.eth`
+
+</div>
