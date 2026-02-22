@@ -4,13 +4,18 @@ Kairos - Blockchain Audit Bot
 
 import cosmosSDK
 from cosmosSDK import Blockchain, Audit, Alerts, Security
+from contract_verifier import ContractVerifier
 
 
 class Kairos:
     """Kairos blockchain security and audit system"""
     
-    def __init__(self):
-        """Initialize Kairos with security configurations"""
+    def __init__(self, etherscan_api_key=None):
+        """Initialize Kairos with security configurations
+        
+        Args:
+            etherscan_api_key (str, optional): API key for Etherscan integration
+        """
         self.blockchain = Blockchain.All
         self.audit = (
             Audit.SmartContracts,
@@ -32,6 +37,8 @@ class Kairos:
             Security.HighRisk: self.autoPatch,
             Security.MediumRisk: self.scheduledPatch
         }
+        # Initialize contract verifier for smart contract auditing
+        self.contract_verifier = ContractVerifier(api_key=etherscan_api_key)
     
     def lockdown(self):
         """Execute lockdown protocol for critical security threats"""
@@ -56,6 +63,58 @@ class Kairos:
         print("   - Stakeholders notified")
         print("   - Monitoring increased")
         return "patch_scheduled"
+    
+    def audit_smart_contract(self, contract_address, chain="eth"):
+        """
+        Audit a smart contract using Etherscan integration
+        
+        Args:
+            contract_address (str): Contract address to audit
+            chain (str): Blockchain network (default: 'eth')
+        
+        Returns:
+            dict: Audit results with security assessment
+        """
+        print(f"\n🔍 AUDITING SMART CONTRACT: {contract_address}")
+        print(f"   Chain: {chain}")
+        
+        result = self.contract_verifier.fetch_and_verify(contract_address, chain=chain)
+        
+        if result['success']:
+            verification = result['verification']
+            
+            # Determine threat level based on findings
+            if not verification['has_source_code']:
+                print("   ⚠️  WARNING: Unverified contract - high risk")
+                threat_level = Security.HighRisk
+            elif len(verification['security_issues']) > 2:
+                print(f"   🚨 CRITICAL: {len(verification['security_issues'])} security issues found")
+                threat_level = Security.Critical
+            elif len(verification['security_issues']) > 0:
+                print(f"   ⚠️  HIGH RISK: {len(verification['security_issues'])} security issue(s) found")
+                threat_level = Security.HighRisk
+            else:
+                print("   ✅ Contract verification passed")
+                threat_level = None
+            
+            # Trigger auto-response if threat detected
+            if threat_level and threat_level in self.autoResponse:
+                print(f"\n   Triggering auto-response for {threat_level}...")
+                self.autoResponse[threat_level]()
+            
+            return {
+                'contract_address': contract_address,
+                'verification': verification,
+                'threat_level': threat_level,
+                'audit_status': 'complete'
+            }
+        else:
+            print(f"   ❌ ERROR: {result['error']}")
+            return {
+                'contract_address': contract_address,
+                'error': result['error'],
+                'audit_status': 'failed'
+            }
 
 
 if __name__ == "__main__":
