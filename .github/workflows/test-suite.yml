@@ -48,7 +48,7 @@ jobs:
           python -c "from cosmosSDK import Blockchain, Audit, Alerts, Security; print('✓ CosmosSDK imports successful')"
           python -c "from cosmosSDK import *; print('✓ All modules loaded')"
       
-      - name: Run unit tests with coverage
+      - name: Run unit tests
         run: |
           echo "Running test suite across all directories..."
           python -m unittest test_kairos.py -v

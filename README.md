@@ -89,10 +89,11 @@ Kairos/
 ```
 
 ## Automated Workflows
-Kairos includes three automated workflows that run every 2 hours to ensure continuous monitoring and security:
+Kairos includes three automated workflows to ensure continuous monitoring and security:
 
 ### 1. Security Audit Workflow
 - **Schedule**: Every 2 hours (cron: `0 */2 * * *`)
+- **Additional Triggers**: On push to `main` branch, manual trigger via `workflow_dispatch`
 - **Purpose**: Performs comprehensive security audits across all directories
 - **Actions**:
   - Scans all Python modules for security issues
@@ -102,6 +103,7 @@ Kairos includes three automated workflows that run every 2 hours to ensure conti
 
 ### 2. Test Suite Workflow
 - **Schedule**: Every 2 hours (cron: `0 */2 * * *`)
+- **Additional Triggers**: On push to `main`, on pull requests to `main`, manual trigger via `workflow_dispatch`
 - **Purpose**: Validates code quality and functionality across all directories
 - **Actions**:
   - Runs complete unit test suite
@@ -112,6 +114,7 @@ Kairos includes three automated workflows that run every 2 hours to ensure conti
 
 ### 3. System Monitoring Workflow
 - **Schedule**: Every 2 hours (cron: `0 */2 * * *`)
+- **Additional Triggers**: Manual trigger via `workflow_dispatch`
 - **Purpose**: Monitors system health and security features
 - **Actions**:
   - Checks Kairos system status
@@ -120,7 +123,7 @@ Kairos includes three automated workflows that run every 2 hours to ensure conti
   - Monitors threat levels
   - Generates monitoring reports
 
-All workflows can also be triggered manually via GitHub Actions interface using the `workflow_dispatch` event.
+All workflows generate reports that are uploaded as artifacts with 30-day retention.
 
 ## License
 Cosmos License - See [LICENSE](LICENSE) file for details

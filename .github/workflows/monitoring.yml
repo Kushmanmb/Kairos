@@ -34,18 +34,7 @@ jobs:
           echo ""
           
           echo "📊 Checking Kairos system status..."
-          python -c '
-          from kairos import Kairos
-          from cosmosSDK import Blockchain, Audit, Alerts, Security
-          
-          kairos = Kairos()
-          print(f"✓ Blockchain monitoring: {kairos.blockchain}")
-          print(f"✓ Audit types active: {len(kairos.audit)} types")
-          print(f"✓ Alerts enabled: {kairos.alerts}")
-          print(f"✓ Security features: {len(kairos.security)} features")
-          print(f"✓ Access levels configured: {len(kairos.accessLevels)} levels")
-          print(f"✓ Auto-response handlers: {len(kairos.autoResponse)} handlers")
-          '
+          python -c 'from kairos import Kairos; from cosmosSDK import Blockchain, Audit, Alerts, Security; kairos = Kairos(); print(f"✓ Blockchain monitoring: {kairos.blockchain}"); print(f"✓ Audit types active: {len(kairos.audit)} types"); print(f"✓ Alerts enabled: {kairos.alerts}"); print(f"✓ Security features: {len(kairos.security)} features"); print(f"✓ Access levels configured: {len(kairos.accessLevels)} levels"); print(f"✓ Auto-response handlers: {len(kairos.autoResponse)} handlers")'
           
           echo ""
           echo "✓ System monitoring complete"
@@ -69,34 +58,7 @@ jobs:
       - name: Verify security features
         run: |
           echo "=== Security Feature Verification ==="
-          python -c '
-          from kairos import Kairos
-          
-          kairos = Kairos()
-          
-          print("Testing security response mechanisms...")
-          print("")
-          
-          # Test lockdown
-          print("1. Testing lockdown mechanism:")
-          result = kairos.lockdown()
-          print(f"   Result: {result}")
-          print("")
-          
-          # Test auto-patch
-          print("2. Testing auto-patch mechanism:")
-          result = kairos.autoPatch()
-          print(f"   Result: {result}")
-          print("")
-          
-          # Test scheduled patch
-          print("3. Testing scheduled patch mechanism:")
-          result = kairos.scheduledPatch()
-          print(f"   Result: {result}")
-          print("")
-          
-          print("✓ All security features verified")
-          '
+          python -c 'from kairos import Kairos; kairos = Kairos(); print("Testing security response mechanisms..."); print(""); print("1. Testing lockdown mechanism:"); result = kairos.lockdown(); print(f"   Result: {result}"); print(""); print("2. Testing auto-patch mechanism:"); result = kairos.autoPatch(); print(f"   Result: {result}"); print(""); print("3. Testing scheduled patch mechanism:"); result = kairos.scheduledPatch(); print(f"   Result: {result}"); print(""); print("✓ All security features verified")'
       
       - name: Generate monitoring report
         run: |
@@ -118,12 +80,4 @@ jobs:
       - name: Check for security alerts
         run: |
           echo "Checking for security alerts..."
-          python -c '
-          from cosmosSDK import Security
-          
-          threat_levels = [Security.Critical, Security.HighRisk, Security.MediumRisk]
-          print("Security threat levels monitored:")
-          for level in threat_levels:
-              print(f"  - {level}")
-          print("✓ Security monitoring active")
-          '
+          python -c 'from cosmosSDK import Security; threat_levels = [Security.Critical, Security.HighRisk, Security.MediumRisk]; print("Security threat levels monitored:"); [print(f"  - {level}") for level in threat_levels]; print("✓ Security monitoring active")'

@@ -40,7 +40,11 @@ jobs:
           
           # Audit root directory
           echo "Auditing root directory..."
-          python kairos.py || true
+          python kairos.py
+          KAIROS_EXIT_CODE=$?
+          if [ "$KAIROS_EXIT_CODE" -ne 0 ]; then
+            echo "Warning: kairos.py exited with code $KAIROS_EXIT_CODE during root directory audit."
+          fi
           
           # Audit cosmosSDK directory
           echo "Auditing cosmosSDK directory..."
