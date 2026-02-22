@@ -42,6 +42,9 @@ class ContractVerifier:
             raise ValueError("Contract address must be a valid string")
         
         # Build query parameters
+        # Note: Using Etherscan API v2 which supports chainid parameter
+        # v1 API uses different endpoints per chain (api.etherscan.io, api-goerli.etherscan.io, etc.)
+        # v2 API uses unified endpoint with chainid parameter as shown in the problem statement
         params = {
             'chainid': chain,
             'module': module,
