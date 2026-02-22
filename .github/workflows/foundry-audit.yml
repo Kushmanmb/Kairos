@@ -57,19 +57,25 @@ jobs:
           fi
 
       - name: Run Forge build
+        id: forge-build
         run: |
           if [ -f foundry.toml ]; then
             forge build --sizes
+            echo "build_status=success" >> $GITHUB_OUTPUT
           else
             echo "No foundry.toml found - skipping Forge build"
+            echo "build_status=skipped" >> $GITHUB_OUTPUT
           fi
 
       - name: Run Forge tests
+        id: forge-tests
         run: |
           if [ -f foundry.toml ]; then
             forge test -vvv
+            echo "test_status=success" >> $GITHUB_OUTPUT
           else
             echo "No foundry.toml found - skipping Forge tests"
+            echo "test_status=skipped" >> $GITHUB_OUTPUT
           fi
 
       - name: Run Slither static analysis
@@ -92,7 +98,12 @@ jobs:
         run: |
           if command -v docker &> /dev/null; then
             echo "Running Mythril analysis..."
-            docker run --rm -v ${{ github.workspace }}:/tmp mythril/myth analyze /tmp --solv 0.8.0 || true
+            # Extract solc version from foundry.toml if available, otherwise use default
+            SOLC_VERSION="0.8.0"
+            if [ -f foundry.toml ] && grep -q "solc_version" foundry.toml; then
+              SOLC_VERSION=$(grep "solc_version" foundry.toml | cut -d'"' -f2 | head -n1)
+            fi
+            docker run --rm -v ${{ github.workspace }}:/tmp mythril/myth analyze /tmp --solv "$SOLC_VERSION" || true
           else
             echo "Docker not available - skipping Mythril analysis"
           fi
@@ -124,12 +135,22 @@ jobs:
           echo "" >> foundry-audit-report.md
           echo "## Results Summary" >> foundry-audit-report.md
           if [ -f results.sarif ]; then
-            echo "- Slither analysis completed ✓" >> foundry-audit-report.md
+            echo "- Slither analysis: Completed ✓" >> foundry-audit-report.md
           else
-            echo "- Slither analysis skipped" >> foundry-audit-report.md
+            echo "- Slither analysis: Skipped" >> foundry-audit-report.md
           fi
-          echo "- Foundry build: Verified" >> foundry-audit-report.md
-          echo "- Security tests: Executed" >> foundry-audit-report.md
+          BUILD_STATUS="${{ steps.forge-build.outputs.build_status }}"
+          TEST_STATUS="${{ steps.forge-tests.outputs.test_status }}"
+          if [ "$BUILD_STATUS" = "success" ]; then
+            echo "- Foundry build: Verified ✓" >> foundry-audit-report.md
+          else
+            echo "- Foundry build: Skipped" >> foundry-audit-report.md
+          fi
+          if [ "$TEST_STATUS" = "success" ]; then
+            echo "- Security tests: Executed ✓" >> foundry-audit-report.md
+          else
+            echo "- Security tests: Skipped" >> foundry-audit-report.md
+          fi
           echo "" >> foundry-audit-report.md
           echo "## Recommendations" >> foundry-audit-report.md
           echo "- Review all findings from static analysis tools" >> foundry-audit-report.md
@@ -145,14 +166,12 @@ jobs:
           path: foundry-audit-report.md
           retention-days: 90
 
-      - name: Upload test results
+      - name: Upload SARIF results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: foundry-test-results
-          path: |
-            foundry-audit-report.md
-            results.sarif
+          name: slither-sarif-results
+          path: results.sarif
           retention-days: 90
 
       - name: Comment on PR (if applicable)
