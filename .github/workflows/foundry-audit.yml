@@ -1,0 +1,181 @@
+---
+# Foundry Security Audit Workflow for Kairos
+# This workflow runs Foundry-based security audits on smart contracts
+#
+# IMPORTANT: This file is protected by CODEOWNERS
+# Changes require approval from @Kushmanmb
+
+name: Foundry Security Audit
+
+on:
+  schedule:
+    # Run Foundry audit daily at 3 AM UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+  # Allow manual triggering
+  push:
+    branches:
+      - main
+    paths:
+      - 'contracts/**'
+      - '**.sol'
+      - 'foundry.toml'
+      - 'remappings.txt'
+
+# Minimal permissions for security
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  security-events: write
+
+jobs:
+  foundry-security-audit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Show Foundry version
+        run: |
+          forge --version
+          cast --version
+          anvil --version
+
+      - name: Install dependencies
+        run: |
+          if [ -f foundry.toml ]; then
+            forge install
+          fi
+
+      - name: Run Forge build
+        id: forge-build
+        run: |
+          if [ -f foundry.toml ]; then
+            forge build --sizes
+            echo "build_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "No foundry.toml found - skipping Forge build"
+            echo "build_status=skipped" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Forge tests
+        id: forge-tests
+        run: |
+          if [ -f foundry.toml ]; then
+            forge test -vvv
+            echo "test_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "No foundry.toml found - skipping Forge tests"
+            echo "test_status=skipped" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Slither static analysis
+        uses: crytic/slither-action@v0.3.0
+        id: slither
+        continue-on-error: true
+        with:
+          fail-on: none
+          sarif: results.sarif
+
+      - name: Upload Slither SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        continue-on-error: true
+        with:
+          sarif_file: results.sarif
+
+      - name: Run mythril security analysis
+        continue-on-error: true
+        run: |
+          if command -v docker &> /dev/null; then
+            echo "Running Mythril analysis..."
+            # Extract solc version from foundry.toml if available, otherwise use default
+            SOLC_VERSION="0.8.0"
+            if [ -f foundry.toml ] && grep -q "solc_version" foundry.toml; then
+              SOLC_VERSION=$(grep "solc_version" foundry.toml | cut -d'"' -f2 | head -n1)
+            fi
+            docker run --rm -v ${{ github.workspace }}:/tmp mythril/myth analyze /tmp --solv "$SOLC_VERSION" || true
+          else
+            echo "Docker not available - skipping Mythril analysis"
+          fi
+
+      - name: Run Foundry security checks
+        run: |
+          if [ -f foundry.toml ]; then
+            echo "Running Foundry security checks..."
+            # Check for common vulnerabilities
+            forge test --match-test "test.*Security" -vvv || true
+            forge test --match-test "test.*Vulnerability" -vvv || true
+            forge test --match-test "test.*Exploit" -vvv || true
+          fi
+
+      - name: Create Foundry audit report
+        if: always()
+        run: |
+          echo "# Foundry Security Audit Report" > foundry-audit-report.md
+          echo "**Date:** $(date)" >> foundry-audit-report.md
+          echo "**Workflow:** Foundry Security Audit" >> foundry-audit-report.md
+          echo "**Status:** Completed" >> foundry-audit-report.md
+          echo "" >> foundry-audit-report.md
+          echo "## Audit Scope" >> foundry-audit-report.md
+          echo "- Smart Contract Security Analysis" >> foundry-audit-report.md
+          echo "- Foundry Build Verification" >> foundry-audit-report.md
+          echo "- Foundry Test Suite Execution" >> foundry-audit-report.md
+          echo "- Static Analysis (Slither)" >> foundry-audit-report.md
+          echo "- Security Pattern Detection" >> foundry-audit-report.md
+          echo "" >> foundry-audit-report.md
+          echo "## Results Summary" >> foundry-audit-report.md
+          if [ -f results.sarif ]; then
+            echo "- Slither analysis: Completed ✓" >> foundry-audit-report.md
+          else
+            echo "- Slither analysis: Skipped" >> foundry-audit-report.md
+          fi
+          BUILD_STATUS="${{ steps.forge-build.outputs.build_status }}"
+          TEST_STATUS="${{ steps.forge-tests.outputs.test_status }}"
+          if [ "$BUILD_STATUS" = "success" ]; then
+            echo "- Foundry build: Verified ✓" >> foundry-audit-report.md
+          else
+            echo "- Foundry build: Skipped" >> foundry-audit-report.md
+          fi
+          if [ "$TEST_STATUS" = "success" ]; then
+            echo "- Security tests: Executed ✓" >> foundry-audit-report.md
+          else
+            echo "- Security tests: Skipped" >> foundry-audit-report.md
+          fi
+          echo "" >> foundry-audit-report.md
+          echo "## Recommendations" >> foundry-audit-report.md
+          echo "- Review all findings from static analysis tools" >> foundry-audit-report.md
+          echo "- Ensure comprehensive test coverage" >> foundry-audit-report.md
+          echo "- Follow best practices for smart contract security" >> foundry-audit-report.md
+          echo "- Regular audits and continuous monitoring" >> foundry-audit-report.md
+
+      - name: Upload Foundry audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundry-audit-report
+          path: foundry-audit-report.md
+          retention-days: 90
+
+      - name: Upload SARIF results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: slither-sarif-results
+          path: results.sarif
+          retention-days: 90
+
+      - name: Comment on PR (if applicable)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Foundry security audit completed"
+          echo "Review the uploaded artifacts for detailed results"
