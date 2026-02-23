@@ -2,8 +2,17 @@
 Kairos - Blockchain Audit Bot
 """
 
+import logging
 import cosmosSDK
 from cosmosSDK import Blockchain, Audit, Alerts, Security
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger(__name__)
 
 
 class Kairos:
@@ -35,26 +44,26 @@ class Kairos:
     
     def lockdown(self):
         """Execute lockdown protocol for critical security threats"""
-        print("🔒 LOCKDOWN INITIATED: Critical security threat detected")
-        print("   - All transactions suspended")
-        print("   - System access restricted")
-        print("   - Security team alerted")
+        logger.critical("🔒 LOCKDOWN INITIATED: Critical security threat detected")
+        logger.critical("   - All transactions suspended")
+        logger.critical("   - System access restricted")
+        logger.critical("   - Security team alerted")
         return "lockdown_active"
     
     def autoPatch(self):
         """Automatically patch high-risk vulnerabilities"""
-        print("⚡ AUTO-PATCH ACTIVATED: High risk vulnerability detected")
-        print("   - Applying security patches")
-        print("   - Monitoring system integrity")
-        print("   - Logging incident details")
+        logger.error("⚡ AUTO-PATCH ACTIVATED: High risk vulnerability detected")
+        logger.warning("   - Applying security patches")
+        logger.info("   - Monitoring system integrity")
+        logger.info("   - Logging incident details")
         return "auto_patch_applied"
     
     def scheduledPatch(self):
         """Schedule patch for medium-risk vulnerabilities"""
-        print("📅 SCHEDULED PATCH: Medium risk vulnerability detected")
-        print("   - Patch queued for next maintenance window")
-        print("   - Stakeholders notified")
-        print("   - Monitoring increased")
+        logger.warning("📅 SCHEDULED PATCH: Medium risk vulnerability detected")
+        logger.info("   - Patch queued for next maintenance window")
+        logger.info("   - Stakeholders notified")
+        logger.info("   - Monitoring increased")
         return "patch_scheduled"
 
 
@@ -62,21 +71,21 @@ if __name__ == "__main__":
     # Initialize Kairos
     kairos = Kairos()
     
-    print("=" * 60)
-    print("KAIROS BLOCKCHAIN AUDIT BOT - INITIALIZED")
-    print("=" * 60)
-    print(f"\n🔗 Blockchain Scope: {kairos.blockchain}")
-    print(f"🔍 Audit Types: {', '.join(kairos.audit)}")
-    print(f"🔔 Alerts Enabled: {kairos.alerts}")
-    print(f"🔐 Permissions: {kairos.permissions}")
-    print(f"💾 Memory Allocated: {kairos.memory}")
-    print(f"🛡️  Security Features: {', '.join(kairos.security)}")
-    print(f"\n📊 Access Levels:")
+    logger.info("=" * 60)
+    logger.info("KAIROS BLOCKCHAIN AUDIT BOT - INITIALIZED")
+    logger.info("=" * 60)
+    logger.info(f"\n🔗 Blockchain Scope: {kairos.blockchain}")
+    logger.info(f"🔍 Audit Types: {', '.join(kairos.audit)}")
+    logger.info(f"🔔 Alerts Enabled: {kairos.alerts}")
+    logger.info(f"🔐 Permissions: {kairos.permissions}")
+    logger.info(f"💾 Memory Allocated: {kairos.memory}")
+    logger.info(f"🛡️  Security Features: {', '.join(kairos.security)}")
+    logger.info(f"\n📊 Access Levels:")
     for level, permission in kairos.accessLevels.items():
-        print(f"   Level {level}: {permission}")
-    print(f"\n⚙️  Auto-Response Mapping:")
+        logger.info(f"   Level {level}: {permission}")
+    logger.info(f"\n⚙️  Auto-Response Mapping:")
     for threat, response in kairos.autoResponse.items():
-        print(f"   {threat} → {response.__name__}()")
-    print("\n" + "=" * 60)
-    print("System Ready - Monitoring Blockchain Activity")
-    print("=" * 60)
+        logger.info(f"   {threat} → {response.__name__}()")
+    logger.info("\n" + "=" * 60)
+    logger.info("System Ready - Monitoring Blockchain Activity")
+    logger.info("=" * 60)
