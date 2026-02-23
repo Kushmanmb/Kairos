@@ -53,7 +53,7 @@ class Kairos:
     def autoPatch(self):
         """Automatically patch high-risk vulnerabilities"""
         logger.error("⚡ AUTO-PATCH ACTIVATED: High risk vulnerability detected")
-        logger.warning("   - Applying security patches")
+        logger.error("   - Applying security patches")
         logger.info("   - Monitoring system integrity")
         logger.info("   - Logging incident details")
         return "auto_patch_applied"

@@ -6,12 +6,7 @@ import logging
 from kairos import Kairos
 from cosmosSDK import Security
 
-# Configure logging for demo
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
+# Get logger (configuration is already set up by kairos module)
 logger = logging.getLogger(__name__)
 
 # Initialize Kairos
