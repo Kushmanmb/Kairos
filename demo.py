@@ -2,31 +2,35 @@
 Demo script showing Kairos security response system in action
 """
 
+import logging
 from kairos import Kairos
 from cosmosSDK import Security
+
+# Get logger (configuration is already set up by kairos module)
+logger = logging.getLogger(__name__)
 
 # Initialize Kairos
 kairos = Kairos()
 
-print("\n" + "="*60)
-print("KAIROS SECURITY RESPONSE DEMO")
-print("="*60 + "\n")
+logger.info("\n" + "="*60)
+logger.info("KAIROS SECURITY RESPONSE DEMO")
+logger.info("="*60 + "\n")
 
 # Demonstrate Critical threat response
-print("Scenario 1: Critical security threat detected")
-print("-" * 60)
+logger.info("Scenario 1: Critical security threat detected")
+logger.info("-" * 60)
 kairos.autoResponse[Security.Critical]()
 
-print("\n" + "-" * 60)
-print("\nScenario 2: High risk vulnerability detected")
-print("-" * 60)
+logger.info("\n" + "-" * 60)
+logger.info("\nScenario 2: High risk vulnerability detected")
+logger.info("-" * 60)
 kairos.autoResponse[Security.HighRisk]()
 
-print("\n" + "-" * 60)
-print("\nScenario 3: Medium risk issue detected")
-print("-" * 60)
+logger.info("\n" + "-" * 60)
+logger.info("\nScenario 3: Medium risk issue detected")
+logger.info("-" * 60)
 kairos.autoResponse[Security.MediumRisk]()
 
-print("\n" + "="*60)
-print("Demo Complete - All security responses functioning correctly")
-print("="*60)
+logger.info("\n" + "="*60)
+logger.info("Demo Complete - All security responses functioning correctly")
+logger.info("="*60)
